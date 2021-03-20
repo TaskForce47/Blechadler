@@ -2,4 +2,5 @@ node_modules/
 dist/
 config/config.json
 config/birthdays.json
-config/leetRankings.json 
+config/leetRankings.json
+.idea/

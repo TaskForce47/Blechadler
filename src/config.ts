@@ -7,6 +7,14 @@ interface TeamspeakConfig {
     discordChannelIDs: string[];
 }
 
+interface Arma3Config {
+    ip: string;
+    port: number;
+    queryInterval: number;
+    serverStatusChannelId: string;
+    serverPlayerUpdateChannelId: string;
+}
+
 interface BirthdaysConfig {
     discordChannelIDs: string[];
 }
@@ -16,9 +24,13 @@ interface LeetConfig {
 }
 
 interface Config {
+    generalChannel: string;
     token: string;
     botChannel: string;
+    botActivity: string;
+    botActivityType: 'PLAYING'|'COMPETING'|'CUSTOM_STATUS'|'LISTENING'|'STREAMING'|'WATCHING'|'';
     teamspeak: TeamspeakConfig;
+    arma3: Arma3Config;
     birthdays: BirthdaysConfig;
     leet: LeetConfig;
 }
