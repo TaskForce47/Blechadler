@@ -8,7 +8,6 @@ export default class Blechadler {
     private activePlugins: string[] = [];
     constructor() {
         this.discordClient = new Discord.Client();
-
         this.discordClient.login(config.token);
 
         this.registerBotStatusCommand();
@@ -18,7 +17,7 @@ export default class Blechadler {
             if (config.botActivity !== '' && config.botActivityType !== '') {
                 this.discordClient.user.setActivity(config.botActivity, { type: config.botActivityType });
             }
-            this.clearChannel(config.botChannel).then(() => {
+            this.clearChannel(config.arma3.serverStatusChannelId).then(() => {
                 /* eslint-disable no-new */
                 // new TeamspeakPlugin(this);
                 new Arma3ServerPlugin(this);

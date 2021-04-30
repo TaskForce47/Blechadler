@@ -11,10 +11,10 @@ export default class Arma3ServerPlugin extends BlechadlerPlugin {
             this.blechadler.sendMessageToChannel(serverPlayerUpdateChannelId, msg);
         };
         service.on('connected', (playerName: string) => {
-            // sendUpdate(`➡️  **${playerName}** joined`);
+            sendUpdate(`➡️  **${playerName}** joined`);
         });
         service.on('disconnected', (playerName: string) => {
-            //  sendUpdate(`⬅️  **${playerName}** left`);
+            sendUpdate(`⬅️  **${playerName}** left`);
         });
         // subscribe to !server messages
         this.blechadler.subscribeToMessages(msg => /^⠀*!server⠀*$/i.test(msg.content), [botChannel], async msg => {
