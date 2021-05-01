@@ -156,29 +156,31 @@ class Arma3Service extends EventEmitter {
                         value: `${server.players.length}/${server.maxplayers}`
                     }
                 ]);
-            let tmpTime = '';
-            let tmpName = '';
-            users.forEach(player => {
-                tmpTime += `${(
-                    Math.round((player.raw.time / 60 / 60) * 100) / 100
-                ).toFixed(2)}h\n`;
-                tmpName += `${player.name}\n`;
-            });
-            if (tmpName.length < 1024) {
-                embed.addFields(
-                    [
-                        {
-                            name: 'Time',
-                            value: tmpTime,
-                            inline: true
-                        },
-                        {
-                            name: 'Name',
-                            value: tmpName,
-                            inline: true
-                        }
-                    ]
-                );
+            if (users.length > 0) {
+                let tmpTime = '';
+                let tmpName = '';
+                users.forEach(player => {
+                    tmpTime += `${(
+                        Math.round((player.raw.time / 60 / 60) * 100) / 100
+                    ).toFixed(2)}h\n`;
+                    tmpName += `${player.name}\n`;
+                });
+                if (tmpName.length < 1024) {
+                    embed.addFields(
+                        [
+                            {
+                                name: 'Time',
+                                value: tmpTime,
+                                inline: true
+                            },
+                            {
+                                name: 'Name',
+                                value: tmpName,
+                                inline: true
+                            }
+                        ]
+                    );
+                }
             }
             return embed;
         } else {
