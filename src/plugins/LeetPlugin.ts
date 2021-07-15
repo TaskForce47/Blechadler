@@ -22,7 +22,7 @@ export default class LeetPlugin extends BlechadlerPlugin {
                 const date = new Date(msg.createdTimestamp);
                 return date.getHours() === LEET_HOUR && date.getMinutes() === LEET_MINUTE && msg.content.includes('1337') && !this.dayArray.some(entry => (entry.userID === msg.author.id));
             },
-            config.leet.discordChannelIDs,
+            config.plugins.leet.discordChannelIDs,
             msg => {
                 if (this.dayArray.length === 0) {
                     // This is the first msg. for 13:37 of the day -> add a timeout to run evaluateDay at 13:38
@@ -50,7 +50,7 @@ export default class LeetPlugin extends BlechadlerPlugin {
             msg => {
                 return msg.content.includes('!myLeetRank');
             },
-            config.leet.discordChannelIDs,
+            config.plugins.leet.discordChannelIDs,
             msg => {
                 const ranking = this.service.getLeetEntry(msg.author.id, msg.author.username);
                 const timeSend = new Date(msg.createdTimestamp);

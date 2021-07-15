@@ -25,7 +25,7 @@ export default class BirthdayPlugin extends BlechadlerPlugin {
                 msg += ` und <@${birthdays[birthdays.length - 1].userID}> Geburtstag! 🥳`;
             }
             // send the message in #general
-            for (const channel of config.birthdays.discordChannelIDs) {
+            for (const channel of config.plugins.birthdays.discordChannelIDs) {
                 this.blechadler.sendMessageToChannel(channel, msg);
             }
         });

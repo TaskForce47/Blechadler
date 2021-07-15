@@ -56,7 +56,7 @@ export default class TeamspeakPlugin extends BlechadlerPlugin {
     }
 
     setup (): void {
-        const { ip, port, sid, username, password, discordChannelIDs } = config.teamspeak;
+        const { ip, port, sid, username, password, discordChannelIDs } = config.plugins.teamspeak;
         const service = new TeamspeakService(ip, port, sid, username, password);
 
         // helper function to send message to all teamspeak channels

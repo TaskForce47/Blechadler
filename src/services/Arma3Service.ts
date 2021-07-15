@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { MessageEmbed } from 'discord.js';
 import Blechadler from '../index';
-import config from '../config';
+import { LoggerService } from './LoggerService';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Gamedig = require('gamedig');
 
@@ -77,7 +77,7 @@ class Arma3Service extends EventEmitter {
 
     public async queryServer(): Promise<void> {
         try {
-            console.log('[Arma 3 SERVICE] Fetching Server Data');
+            await LoggerService.getInstance().writeLog('Arma 3 SERVICE', 'Information', 'Fetching Server Data');
             await Gamedig.query(
                 {
                     type: 'arma3',
@@ -85,12 +85,12 @@ class Arma3Service extends EventEmitter {
                     port: this.config.port
                 }
             ).then(latestServerState => {
-                console.log('[Arma 3 SERVICE] Received Server Data');
+                LoggerService.getInstance().writeLog('Arma 3 SERVICE', 'Information', 'Received Server Data');
                 this.cacheUsers(latestServerState);
                 this.serverCache = latestServerState;
             });
         } catch (err) {
-            console.log('[Arma 3 SERVICE] ERROR: Server Data empty');
+            LoggerService.getInstance().writeLog('Arma 3 SERVICE', 'Warning', 'Server Data empty');
         }
     }
 
@@ -165,7 +165,7 @@ class Arma3Service extends EventEmitter {
                     ).toFixed(2)}h\n`;
                     tmpName += `${player.name}\n`;
                 });
-                if (tmpName.length < 1024) {
+                if (tmpName.length < 1024 && tmpName.length > 0) {
                     embed.addFields(
                         [
                             {

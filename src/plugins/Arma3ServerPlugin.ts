@@ -4,8 +4,8 @@ import Arma3Service from '../services/Arma3Service';
 export default class Arma3ServerPlugin extends BlechadlerPlugin {
     setup(): void {
         this.blechadler.registerPlugin(Arma3ServerPlugin.name);
-        const { ip, port, queryInterval, serverStatusChannelId, serverPlayerUpdateChannelId } = config.arma3;
-        const botChannel = config.botChannel;
+        const { ip, port, queryInterval, serverStatusChannelId, serverPlayerUpdateChannelId } = config.plugins.arma3;
+        const botChannel = config.bot.botChannel;
         const service = new Arma3Service(ip, port, queryInterval);
         const sendUpdate = (msg: string) => {
             this.blechadler.sendMessageToChannel(serverPlayerUpdateChannelId, msg);
@@ -25,6 +25,9 @@ export default class Arma3ServerPlugin extends BlechadlerPlugin {
                 msg.reply('Da is irgendetwas schief gelaufen 😰. Bitte hau mich nicht 🥺');
             }
         });
-        service.registerServerEmbed(this.blechadler, serverStatusChannelId);
+
+        this.blechadler.clearChannel(serverStatusChannelId).then(() => {
+            service.registerServerEmbed(this.blechadler, serverStatusChannelId);
+        });
     }
 }

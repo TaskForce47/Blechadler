@@ -2,29 +2,37 @@ import * as Discord from 'discord.js';
 import config from './config';
 import { MessageEmbed } from 'discord.js';
 import Arma3ServerPlugin from './plugins/Arma3ServerPlugin';
-
+import { LoggerService } from './services/LoggerService';
+import format from './utils/formatDate';
+process.env.botDir = __dirname;
 export default class Blechadler {
     private discordClient: Discord.Client;
     private activePlugins: string[] = [];
     constructor() {
-        this.discordClient = new Discord.Client();
-        this.discordClient.login(config.token);
+        try {
+            console.log('Warming up...');
+            setInterval(() => {
+                console.log(new Date().toISOString() + " I'm still here");
+                this.updateBotActivity();
+            }, config.bot.heartbeatInterval);
+            this.discordClient = new Discord.Client();
+            this.discordClient.login(config.bot.token);
 
-        this.registerBotStatusCommand();
+            this.registerBotStatusCommand();
 
-        this.discordClient.on('ready', () => {
-            console.log('Discord Logged In');
-            if (config.botActivity !== '' && config.botActivityType !== '') {
-                this.discordClient.user.setActivity(config.botActivity, { type: config.botActivityType });
-            }
-            this.clearChannel(config.arma3.serverStatusChannelId).then(() => {
-                /* eslint-disable no-new */
-                // new TeamspeakPlugin(this);
+            this.discordClient.on('ready', () => {
+                LoggerService.getInstance().on('messageToUser', (clientID, message) => {
+                    this.sendMessageToUser(clientID, message);
+                });
+                LoggerService.getInstance().writeLog('Core', 'Information', 'Discord Logged In');
+                this.updateBotActivity();
+
+                // eslint-disable-next-line no-new
                 new Arma3ServerPlugin(this);
-                // new BirthdayPlugin(this);
-                // new LeetPlugin(this);
             });
-        });
+        } catch (err) {
+            LoggerService.getInstance().writeLog('Core', 'Critical', 'Error in main loop' + err);
+        }
     }
 
     /**
@@ -59,11 +67,11 @@ export default class Blechadler {
     }
 
     public async registerHelpMessage(message: string|MessageEmbed, options: Discord.MessageOptions = {}, callback: (msg: Discord.Message) => unknown): Promise<void> {
-        const helpMessage = await this.sendMessageToChannel(config.botChannel, message, options);
+        const helpMessage = await this.sendMessageToChannel(config.bot.botChannel, message, options);
 
         this.subscribeToMessages(
             msg => (msg.reference && msg.reference.messageID === helpMessage.id),
-            [config.botChannel],
+            [config.bot.botChannel],
             callback
         );
     }
@@ -77,12 +85,13 @@ export default class Blechadler {
     }
 
     private registerBotStatusCommand() {
-        this.subscribeToMessages(msg => /^⠀*!status⠀*$/i.test(msg.content), [config.botChannel], async msg => {
+        this.subscribeToMessages(msg => /^⠀*!status⠀*$/i.test(msg.content), [config.bot.botChannel], async msg => {
             try {
                 const response = new MessageEmbed()
                     .setColor('#4caf50')
                     .setTimestamp(Date.now())
                     .addFields(
+                        { name: 'Uptime', value: format(process.uptime()) },
                         { name: 'API latency', value: `${this.discordClient.ws.ping}ms` },
                         { name: 'Memory usage', value: `${(Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) / 100)} MB` },
                         { name: 'Active Plugins', value: `${this.activePlugins}` }
@@ -94,17 +103,38 @@ export default class Blechadler {
         });
     }
 
-    private async clearChannel(channelId) {
-        await this.discordClient.channels.fetch(channelId).then(channel => {
-            (channel as Discord.TextChannel).messages.fetch({ limit: 100 }).then(messages => {
-                if (messages.size > 0) {
-                    (channel as Discord.TextChannel).bulkDelete(messages).then(() => {
-                        console.log(`Cleared ${messages.size} Messages`);
-                        this.clearChannel(channelId);
-                    });
+    public async clearChannel(channelId: string): Promise<void> {
+        try {
+            const channel = await this.discordClient.channels.fetch(channelId);
+            return (channel as Discord.TextChannel).messages.fetch({ limit: 100 }).then(async collected => {
+                if (collected.size > 0) {
+                    await (channel as Discord.TextChannel).bulkDelete(collected, true);
+                    this.clearChannel(channelId);
                 }
             });
-        });
+        } catch (e) {
+            LoggerService.getInstance().writeLog('Core', 'Critical', 'Failed to clear channel with ID ' + channelId);
+        }
+    }
+
+    private updateBotActivity() {
+        if (config.bot.botActivity !== '' && config.bot.botActivityType !== '') {
+            this.discordClient.user.setActivity(config.bot.botActivity, { type: config.bot.botActivityType });
+        }
+    }
+
+    public async sendMessageToUser(userId: string, content: string|MessageEmbed): Promise<void> {
+        try {
+            this.discordClient.guilds.fetch(config.bot.guildID).then((guild: Discord.Guild) => {
+                guild.members.fetch({ user: userId }).then((user: Discord.GuildMember) => {
+                    user.createDM(true).then((dmChannel: Discord.DMChannel) => {
+                        dmChannel.send(content);
+                    });
+                });
+            });
+        } catch (err) {
+            LoggerService.getInstance().writeLog('Core', 'Critical', 'Failed to send Message to user with ID ' + userId);
+        }
     }
 }
 
