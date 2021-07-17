@@ -218,14 +218,18 @@ class Arma3Service extends EventEmitter {
     }
 
     public async registerServerEmbed(bot: Blechadler, serverStatusChannelId: string):Promise<void> {
-        await this.queryServer();
-        const message = await this.buildServerResponse();
-        const helpMessage = await bot.sendMessageToChannel(serverStatusChannelId, '', { embed: message });
-        setInterval(() => {
-            this.buildServerResponse().then(msg => {
-                helpMessage.edit('', { embed: msg });
-            });
-        }, 80000);
+        try {
+            await this.queryServer();
+            const message = await this.buildServerResponse();
+            const helpMessage = await bot.sendMessageToChannel(serverStatusChannelId, '', { embed: message });
+            setInterval(() => {
+                this.buildServerResponse().then(msg => {
+                    helpMessage.edit('', { embed: msg });
+                });
+            }, 80000);
+        } catch (e) {
+            await LoggerService.getInstance().writeLog('Arma 3 SERVICE', 'Warning', e);
+        }
     }
 }
 
