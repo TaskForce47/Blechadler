@@ -90,7 +90,7 @@ class Arma3Service extends EventEmitter {
                 this.serverCache = latestServerState;
             });
         } catch (err) {
-            LoggerService.getInstance().writeLog('Arma 3 SERVICE', 'Warning', 'Server Data empty');
+            LoggerService.getInstance().writeLog('Arma 3 SERVICE', 'Information', 'Server Data empty');
         }
     }
 
